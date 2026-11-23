@@ -6,7 +6,7 @@
 
 **Next-Generation Fully Isolated VM-Level AI Subscription-to-API Gateway**
 
-[![Release](https://img.shields.io/badge/Release-v1.4.071-blue.svg?style=for-the-badge&logo=github)](https://github.com/dofastted/vm2api/releases/tag/v1.4.071)
+[![Release](https://img.shields.io/badge/Release-v1.4.181-blue.svg?style=for-the-badge&logo=github)](https://github.com/dofastted/vm2api/releases/tag/v1.4.071)
 [![License](https://img.shields.io/badge/License-Noncommercial-amber.svg?style=for-the-badge)](LICENSE)
 [![Benchmarks](https://img.shields.io/badge/Benchmarks-Clean%20Verified-00C853?style=for-the-badge&logo=shield)](docs/benchmarks/README.md)
 [![Cluster](https://img.shields.io/badge/Cluster-Multi--VPS%20Ready-7928CA?style=for-the-badge&logo=docker)](docs/DEPLOY.md)
@@ -36,6 +36,19 @@
 </details>
 
 ---
+
+## 🚨 当前部署与二改说明（v1.4.181）
+
+> **本仓库当前部署基于官方 `vm2api v1.4.181`。** 二改内容只保留兼容性与运行配置，不替换官方协议核心实现。
+>
+> - 账号池 thinking 所有权过滤：`failover.thinking_owner_filter=false`，跨账号重试时保留调用方 thinking 历史。
+> - 最小输出额度兼容：`compatibility.min_max_tokens.enabled=false`，不会把调用方的 `max_tokens=16` 强制抬到 `128`。
+> - thinking / adaptive 采样兼容：出站兼容层会按模型能力处理 `temperature`、`top_p`、`top_k`；这属于网关改写，不等同于上游对所有模型的统一限制。
+> - 官方 `v1.4.181` 增加 `sampling_repairable`：上游明确拒绝采样字段时，可删除采样字段执行一次修复重试。
+>
+> **配置与行为边界：** thinking 所有权过滤和采样参数兼容是两条独立路径；前者决定历史签名是否按账号归属过滤，后者决定出站请求如何满足对应模型的协议校验。完整记录见 [`二改版-README.md`](二改版-README.md)。
+>
+> 官方发布页：[`v1.4.181`](https://github.com/dofastted/vm2api/releases/tag/v1.4.181) · 官方变更记录：[`CHANGELOG.md`](CHANGELOG.md)
 
 # 🇨🇳 简体中文
 

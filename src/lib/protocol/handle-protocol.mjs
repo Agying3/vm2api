@@ -1824,9 +1824,13 @@ export function createHandleProtocol(deps) {
         applyAttempt: async (body, selected, extra = {}) => {
           // Only this account's own thinking replays as thinking. Another
           // account's signature, or one with no record, goes out as text.
-          const owned = filterThinkingForAccount(body, selected.accountId, thinkingOwnerStore)
+          // Preserve caller thinking when account-pool ownership filtering is disabled.
+          const ownerFilterOn = getRouting()?.failover?.thinking_owner_filter !== false
+          const owned = ownerFilterOn
+            ? filterThinkingForAccount(body, selected.accountId, thinkingOwnerStore)
+            : { body, kept: 0, converted: 0, dropped: 0, unknown: 0 }
           body = owned.body
-          if (owned.kept || owned.converted || owned.dropped) {
+          if (ownerFilterOn && (owned.kept || owned.converted || owned.dropped)) {
             const { kept, converted, dropped, unknown } = owned
             logBag.hop_meta = {
               ...logBag.hop_meta,
@@ -2060,7 +2064,9 @@ export function createHandleProtocol(deps) {
                 entrypoint: entrypointNow,
               })
               // The re-render starts from the raw caller body; re-apply this account's thinking ownership to it.
-              hopBody = filterThinkingForAccount(hopBody, selected.accountId, thinkingOwnerStore).body
+              if (getRouting()?.failover?.thinking_owner_filter !== false) {
+                hopBody = filterThinkingForAccount(hopBody, selected.accountId, thinkingOwnerStore).body
+              }
               for (const policy of extra.repairs || []) hopBody = repairAnthropicRequest(hopBody, policy)
             }
             hopBody = prepareCliHopBody(hopBody, {

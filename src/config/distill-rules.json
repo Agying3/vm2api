@@ -1,7 +1,7 @@
 {
-  "enabled": true,
-  "skip_official": true,
-  "skip_zero": true,
+  "enabled": false,
+  "skip_official": false,
+  "skip_zero": false,
   "error": {
     "status": 403,
     "type": "permission_error",
@@ -10,8 +10,8 @@
   },
   "structure": {
     "min_max_tokens": 8192,
-    "require_no_tools": true,
-    "require_single_turn": true,
+    "require_no_tools": false,
+    "require_single_turn": false,
     "contest_pattern": "prove that|\\\\boxed|\\baime\\b|olympiad|\\bgpqa\\b|which of the following|livecodebench|amc[_\\s-]?aime"
   },
   "hard_needles": [

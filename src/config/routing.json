@@ -3,8 +3,19 @@
     "enabled": true,
     "mode": "conversation",
     "ttl_seconds": 86400,
-    "header_keys": ["x-session-id", "x-conversation-id", "x-claude-code-session-id", "session-id", "thread-id"],
-    "body_keys": ["conversation_id", "session_id", "thread_id", "prompt_cache_key"],
+    "header_keys": [
+      "x-session-id",
+      "x-conversation-id",
+      "x-claude-code-session-id",
+      "session-id",
+      "thread-id"
+    ],
+    "body_keys": [
+      "conversation_id",
+      "session_id",
+      "thread_id",
+      "prompt_cache_key"
+    ],
     "outbound_session": "rebuild"
   },
   "concurrency": {
@@ -61,7 +72,7 @@
     "mode": "normal",
     "retain_days": 7,
     "debug_retain_days": 3,
-    "max_mb": 2048
+    "max_mb": 4608
   },
   "pool": {
     "strategy": "balanced",
@@ -73,7 +84,13 @@
     "worker_health_ttl_ms": 5000,
     "heartbeat_stale_ms": 15000,
     "circuit_failure_threshold": 3,
-    "circuit_open_ms": 30000
+    "circuit_open_ms": 30000,
+    "session_affinity_first": false,
+    "fable_requires_max": false,
+    "family_affinity_first": false,
+    "keep_pin_on_model_gate": false,
+    "reset_priority": true,
+    "fresh_account_isolation_ms": 0
   },
   "failover": {
     "max_total_attempts": 12,
@@ -84,7 +101,8 @@
     "stream_idle_timeout_ms": 180000,
     "queue_keepalive_delay_ms": 60000,
     "session_queue_timeout_ms": 900000,
-    "eager_tool_streaming": true
+    "eager_tool_streaming": true,
+    "thinking_owner_filter": false
   },
   "websocket": {
     "enabled": true
@@ -92,21 +110,49 @@
   "inference": {
     "engine": "rust",
     "fallback_to_go": false,
-    "session_slots": 20
+    "strict": false,
+    "eager_start": true,
+    "health_ttl_ms": 2000,
+    "health_timeout_ms": 800,
+    "kernel_down_reprobe_ms": 2500,
+    "tcp_nodelay": true,
+    "session_slots": 20,
+    "prewarm_enabled": false,
+    "session_idle_ttl_seconds": 600,
+    "dataplane": "wrap",
+    "crag_kernel_version": "v2"
   },
   "codex": {
     "enabled": true,
     "catalog_client_version": "auto",
-    "user_agent": "codex_cli_rs/0.170.0 (linux x86_64)",
+    "user_agent": "codex_cli_rs/0.167.1 (linux x86_64)",
     "upstream_transport": "prefer_websocket",
-    "websocket": { "enabled": true },
-    "client_features": { "enabled": false },
-    "analytics": { "enabled": false },
+    "websocket": {
+      "enabled": true
+    },
+    "client_features": {
+      "enabled": false
+    },
+    "analytics": {
+      "enabled": false
+    },
     "protocols": {
-      "openai.responses": { "mode": "native", "enabled": true },
-      "openai.chat": { "mode": "convert", "enabled": true },
-      "openai.completions": { "mode": "convert", "enabled": true },
-      "anthropic.messages": { "mode": "reject", "enabled": false }
+      "openai.responses": {
+        "mode": "native",
+        "enabled": true
+      },
+      "openai.chat": {
+        "mode": "convert",
+        "enabled": true
+      },
+      "openai.completions": {
+        "mode": "convert",
+        "enabled": true
+      },
+      "anthropic.messages": {
+        "mode": "reject",
+        "enabled": false
+      }
     },
     "convert": {
       "chat_to_codex": true,
@@ -130,14 +176,20 @@
       "codex-auto-review": "gpt-6-luna"
     }
   },
-
   "compatibility": {
     "persona_preset": "official_full",
     "crag_persona_preset": "official_full",
     "overlay_preset": "off",
     "persona_park": false,
     "cache_ttl": "1h",
-    "min_max_tokens": { "enabled": true, "value": 128, "mode": "floor" }
+    "min_max_tokens": {
+      "enabled": false,
+      "value": 128,
+      "mode": "floor"
+    },
+    "cch_enabled": true,
+    "thinking_display": "summarized",
+    "auto_compact_window": null
   },
   "official_cc": {
     "enabled": true,
@@ -151,11 +203,12 @@
     "resident": false,
     "inference": "cli-hop"
   },
-
   "usage_probe": {
     "enabled": false,
     "interval_sec": 60,
     "stale_sec": 300,
+    "reset_delay_sec": 0,
+    "reset_jitter_sec": 0,
     "run_on_start": true,
     "concurrency": 2,
     "timeout_ms": 60000
@@ -171,22 +224,33 @@
     "intercept_warmup": true,
     "fail_closed": true,
     "run_on_start": true,
+    "probe_all_slots": false,
+    "concurrency": 2,
     "real": {
       "model": "claude-haiku-4-5",
       "prompt": "hello",
       "max_tokens": 64,
       "timeout_ms": 60000,
       "outbound_mode": "official",
-      "vm_ids": []
+      "vm_ids": [],
+      "openai_model": ""
     },
     "match": {
       "max_tokens": 32,
       "max_prompt_chars": 16,
-      "prompts": ["hi", "hello", "ping", "test", "健康"],
+      "prompts": [
+        "hi",
+        "hello",
+        "ping",
+        "test",
+        "健康"
+      ],
       "require_no_system": true,
       "require_no_tools": true,
       "require_single_user": true,
       "skip_official": true,
+      "allow_missing_max_tokens": true,
+      "sub2api_account_test": true,
       "ua_regex": ""
     }
   },
@@ -206,7 +270,8 @@
       "revoked": true,
       "invalid": true,
       "account_down": false,
-      "account_up": false
+      "account_up": false,
+      "vm_down": true
     },
     "email": {
       "enabled": false,
@@ -227,6 +292,11 @@
       "enabled": false,
       "webhook": "",
       "mention_all": false
+    },
+    "feishu": {
+      "enabled": false,
+      "webhook": "",
+      "secret": ""
     }
   },
   "vm": {
@@ -243,5 +313,20 @@
     },
     "mac_oui": "52:54:00",
     "allow_tcg": false
+  },
+  "telemetry": {
+    "upload_interval_seconds": 600,
+    "default_enabled": false,
+    "disable_nonessential_traffic": false
+  },
+  "redaction": {
+    "enabled": false,
+    "secrets": true,
+    "personal": true,
+    "words": [],
+    "wordsAnyCase": false,
+    "rules": [],
+    "kinds": {},
+    "allow": []
   }
 }
